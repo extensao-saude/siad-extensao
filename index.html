@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SIAD-Extensão — Apoio à Decisão em Extensão em Saúde</title>
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#f6f7f5;--surface:#fff;--surface-2:#eef1ed;--ink:#1b2320;--ink-2:#55635c;
+  --line:#d9e0da;--accent:#1f6b4f;--accent-soft:#e4f0e9;--on-accent:#fff;
+  --alert:#8c2f18;--alert-soft:#fbeae5;--warn:#8a6100;--warn-soft:#fbf1da;
+  --ods:#1f5b8c;--ods-soft:#e3eef7;--radius:14px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#121614;--surface:#1b211e;--surface-2:#232b27;--ink:#e8ede9;--ink-2:#a2b0a8;
+  --line:#2f3934;--accent:#69c79d;--accent-soft:#1d2f27;--on-accent:#0f1512;
+  --alert:#f0a58f;--alert-soft:#33201b;--warn:#e8c476;--warn-soft:#2e2718;
+  --ods:#8cc2ea;--ods-soft:#18262f;}}
+:root[data-theme="dark"]{
+  --bg:#121614;--surface:#1b211e;--surface-2:#232b27;--ink:#e8ede9;--ink-2:#a2b0a8;
+  --line:#2f3934;--accent:#69c79d;--accent-soft:#1d2f27;--on-accent:#0f1512;
+  --alert:#f0a58f;--alert-soft:#33201b;--warn:#e8c476;--warn-soft:#2e2718;
+  --ods:#8cc2ea;--ods-soft:#18262f;}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);line-height:1.55;font-size:16px;
+ font-family:"Segoe UI",Roboto,-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif}
+.wrap{max-width:920px;margin:0 auto;padding:0 18px 80px}
+header.top{background:var(--surface);border-bottom:1px solid var(--line);padding:24px 18px 0}
+header.top .inner{max-width:920px;margin:0 auto}
+.brand{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+h1{font-size:1.4rem;margin:0;letter-spacing:-.01em}
+.tag{font-size:.68rem;text-transform:uppercase;letter-spacing:.09em;color:var(--accent);
+ background:var(--accent-soft);padding:3px 8px;border-radius:99px;font-weight:600}
+header.top p.sub{margin:9px 0 16px;color:var(--ink-2);font-size:.9rem;max-width:64ch}
+nav.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+nav.tabs::-webkit-scrollbar{display:none}
+nav.tabs button{background:none;border:0;border-bottom:3px solid transparent;color:var(--ink-2);
+ padding:11px 14px;font-size:.88rem;font-weight:600;white-space:nowrap;cursor:pointer;border-radius:0}
+nav.tabs button[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent)}
+section.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+ padding:20px;margin-bottom:18px}
+.panel{display:none;padding-top:26px}
+.panel.on{display:block}
+h2{font-size:1.02rem;margin:0 0 4px;letter-spacing:-.01em}
+h2 .num{color:var(--accent);margin-right:6px}
+.hint{color:var(--ink-2);font-size:.85rem;margin:0 0 14px}
+fieldset{border:0;padding:0;margin:0 0 20px}
+legend{font-weight:600;font-size:.9rem;margin-bottom:9px;padding:0}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opt{position:relative}
+.opt input{position:absolute;opacity:0;width:0;height:0}
+.opt span{display:inline-block;padding:7px 13px;border:1px solid var(--line);border-radius:99px;
+ font-size:.85rem;cursor:pointer;background:var(--surface-2);color:var(--ink);user-select:none}
+.opt input:checked + span{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:600}
+.opt input:focus-visible + span{outline:2px solid var(--accent);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+button.act{font:inherit;font-weight:600;border-radius:10px;border:1px solid transparent;
+ padding:11px 18px;cursor:pointer;background:var(--accent);color:var(--on-accent)}
+button.ghost{font:inherit;background:transparent;color:var(--ink);border:1px solid var(--line);
+ border-radius:10px;padding:11px 18px;cursor:pointer;font-weight:500}
+.alertbox{border-radius:var(--radius);padding:16px 18px;margin-bottom:14px;border:1px solid}
+.alertbox.stop{background:var(--alert-soft);border-color:var(--alert)}
+.alertbox.warn{background:var(--warn-soft);border-color:var(--warn)}
+.alertbox h3{margin:0 0 6px;font-size:.95rem}
+.alertbox.stop h3{color:var(--alert)}.alertbox.warn h3{color:var(--warn)}
+.alertbox p{margin:0 0 8px;font-size:.89rem}
+.alertbox ul{margin:6px 0 0;padding-left:20px;font-size:.87rem}
+.layer{margin:26px 0 12px}
+.layer h3{font-size:.76rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-2);margin:0 0 2px}
+.layer p{margin:0;font-size:.84rem;color:var(--ink-2)}
+details.ficha{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+ margin-bottom:10px;overflow:hidden}
+details.ficha[open]{border-color:var(--accent)}
+summary{list-style:none;cursor:pointer;padding:15px 18px;display:block}
+summary::-webkit-details-marker{display:none}
+.ftitle{font-weight:600;font-size:.96rem;display:block;margin-bottom:6px}
+.meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.chip{font-size:.7rem;padding:2px 8px;border-radius:99px;background:var(--surface-2);
+ color:var(--ink-2);border:1px solid var(--line)}
+.chip.ev{background:var(--accent-soft);color:var(--accent);border-color:transparent;font-weight:600}
+.chip.ods{background:var(--ods-soft);color:var(--ods);border-color:transparent;font-weight:600}
+.chip.lvl{background:var(--warn-soft);color:var(--warn);border-color:transparent;font-weight:600}
+.body{padding:0 18px 18px;border-top:1px solid var(--line);margin-top:4px;padding-top:14px}
+.body dl{margin:0;display:grid;gap:12px}
+.body dt{font-size:.71rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-2);margin-bottom:3px}
+.body dd{margin:0;font-size:.89rem}
+.body ul{margin:4px 0 0;padding-left:19px;font-size:.89rem}
+.body li{margin-bottom:3px}
+.refs{color:var(--ink-2)}
+.why{font-size:.78rem;color:var(--ink-2);margin:12px 0 -4px 4px;font-style:italic}
+.empty{text-align:center;color:var(--ink-2);padding:34px 12px;font-size:.9rem}
+.count{font-size:.85rem;color:var(--ink-2);margin:0 0 4px}
+.odsgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;margin-top:6px}
+.odscard{border:1px solid var(--line);border-left:4px solid var(--ods);border-radius:10px;
+ padding:11px 13px;background:var(--surface-2)}
+.odscard b{display:block;font-size:.83rem;color:var(--ods);margin-bottom:3px}
+.odscard span{font-size:.81rem;color:var(--ink-2)}
+footer.note{margin-top:34px;font-size:.79rem;color:var(--ink-2);border-top:1px solid var(--line);padding-top:16px}
+@media print{header.top,#formulario,.noprint{display:none!important}
+ body{background:#fff;color:#000;font-size:11pt}
+ .panel{display:block!important}
+ details.ficha{break-inside:avoid;border:1px solid #bbb}
+ details.ficha .body{display:block!important}}
+</style>
+</head>
+<body>
+<header class="top">
+ <div class="inner">
+  <div class="brand"><h1>SIAD-Extensão</h1><span class="tag">protótipo v0.2</span></div>
+  <p class="sub">Apoio à decisão para intervenções em extensão universitária em saúde: do diagnóstico situacional às opções de ação, produto educacional e alinhamento com os Objetivos de Desenvolvimento Sustentável.</p>
+  <nav class="tabs" role="tablist">
+   <button role="tab" data-p="diag" aria-selected="true">Diagnóstico → opções</button>
+   <button role="tab" data-p="acoes" aria-selected="false">Ações de educação em saúde</button>
+   <button role="tab" data-p="prod" aria-selected="false">Produtos educacionais</button>
+   <button role="tab" data-p="ods" aria-selected="false">ODS</button>
+  </nav>
+ </div>
+</header>
+
+<div class="wrap">
+
+<!-- ABA 1 -->
+<div class="panel on" id="p-diag">
+ <section class="card" id="formulario">
+  <h2><span class="num">1.</span>Caracterização do diagnóstico situacional</h2>
+  <p class="hint">Marque tudo que se aplica ao território avaliado.</p>
+  <fieldset><legend>Cenário da intervenção</legend><div class="opts" data-group="cenario"></div></fieldset>
+  <fieldset><legend>Ciclo de vida predominante</legend><div class="opts" data-group="ciclo"></div></fieldset>
+  <fieldset><legend>Característica do território</legend><div class="opts" data-group="territorio"></div></fieldset>
+  <fieldset><legend>Problemas / necessidades identificadas</legend><div class="opts" data-group="problemas"></div></fieldset>
+  <fieldset><legend>Determinantes sociais presentes</legend><div class="opts" data-group="determinantes"></div></fieldset>
+  <fieldset><legend>Recursos e condições disponíveis</legend><div class="opts" data-group="recursos"></div></fieldset>
+  <div class="row">
+   <button class="act" id="gerar">Gerar opções de intervenção</button>
+   <button class="ghost" id="exemplo">Carregar caso-exemplo (escola)</button>
+   <button class="ghost" id="limpar">Limpar</button>
+  </div>
+ </section>
+ <section id="resultado"></section>
+</div>
+
+<!-- ABA 2 -->
+<div class="panel" id="p-acoes">
+ <section class="card">
+  <h2>Catálogo de ações de educação em saúde</h2>
+  <p class="hint">Abordagens para atuar diretamente com a população, com ênfase em metodologias ativas. Use como menu de possibilidades ao planejar a ação de campo.</p>
+  <fieldset style="margin-bottom:10px"><legend>Filtrar por público</legend><div class="opts" data-group="fa_pub"></div></fieldset>
+  <fieldset style="margin-bottom:10px"><legend>Filtrar por complexidade de execução</legend><div class="opts" data-group="fa_cpx"></div></fieldset>
+ </section>
+ <div id="lista-acoes"></div>
+</div>
+
+<!-- ABA 3 -->
+<div class="panel" id="p-prod">
+ <section class="card">
+  <h2>Catálogo de produtos educacionais</h2>
+  <p class="hint">Tecnologias que o aluno de extensão pode desenvolver como produto, com o caminho de validação e de registro de cada uma. Todo produto aqui é passível de registro e de publicação.</p>
+  <fieldset style="margin-bottom:10px"><legend>Filtrar por natureza</legend><div class="opts" data-group="fp_nat"></div></fieldset>
+  <fieldset style="margin-bottom:10px"><legend>Filtrar por complexidade de execução</legend><div class="opts" data-group="fp_cpx"></div></fieldset>
+ </section>
+ <div id="lista-prod"></div>
+</div>
+
+<!-- ABA 4 -->
+<div class="panel" id="p-ods">
+ <section class="card">
+  <h2>Alinhamento com os Objetivos de Desenvolvimento Sustentável</h2>
+  <p class="hint">Metas da Agenda 2030 utilizadas para indexar as fichas, ações e produtos desta ferramenta. Clique em uma meta para ver tudo que se vincula a ela.</p>
+  <div class="opts" data-group="fods" style="margin-bottom:6px"></div>
+ </section>
+ <div id="painel-ods"></div>
+</div>
+
+<footer class="note">
+ Protótipo acadêmico para demonstração de arquitetura. O banco é inicial e ilustrativo: cada ficha, ação e produto precisa passar por validação de conteúdo por juízes (Delphi / IVC) antes de uso em campo, e as referências devem ser conferidas na versão vigente. A ferramenta apoia a decisão, não a substitui — a escolha final é sempre construída com a comunidade.
+</footer>
+</div>
+
+<script>
+/* ============ ODS ============ */
+const ODS={
+"1.3":["ODS 1","Proteção social para os mais pobres e vulneráveis"],
+"2.2":["ODS 2","Acabar com todas as formas de má nutrição"],
+"3.3":["ODS 3","Acabar com epidemias como HIV e outras IST"],
+"3.4":["ODS 3","Reduzir mortalidade por DCNT e promover saúde mental e bem-estar"],
+"3.5":["ODS 3","Prevenir e tratar o abuso de álcool e outras drogas"],
+"3.7":["ODS 3","Acesso universal a saúde sexual e reprodutiva e a planejamento familiar"],
+"3.8":["ODS 3","Cobertura universal de saúde e acesso a serviços essenciais"],
+"4.1":["ODS 4","Educação de qualidade e permanência escolar"],
+"4.7":["ODS 4","Educação para cidadania, direitos humanos e desenvolvimento sustentável"],
+"5.2":["ODS 5","Eliminar todas as formas de violência contra mulheres e meninas"],
+"5.6":["ODS 5","Assegurar direitos sexuais e reprodutivos"],
+"6.1":["ODS 6","Acesso a água potável segura"],
+"10.2":["ODS 10","Promover inclusão social, econômica e política de todos"],
+"10.3":["ODS 10","Garantir igualdade de oportunidades e reduzir desigualdades de resultado"],
+"16.2":["ODS 16","Acabar com abuso, exploração e violência contra crianças"],
+"17.17":["ODS 17","Parcerias eficazes entre setores público, privado e sociedade civil"]
+};
+
+/* ============ VOCABULÁRIO ============ */
+const VOCAB={
+ cenario:[["escola","Escola"],["ubs","UBS / ESF"],["comunidade","Comunidade / território"],["ilpi","ILPI / acolhimento"],["domicilio","Domicílio"],["hospital","Hospital / ambulatório"]],
+ ciclo:[["infancia","Infância (0–9)"],["adolescencia","Adolescência (10–19)"],["adulto","Pessoa adulta"],["idoso","Pessoa idosa"],["gestante","Gestantes"]],
+ territorio:[["urbano","Urbano"],["rural","Rural"],["ribeirinho","Ribeirinho"],["periferico","Periferia urbana"],["tradicional","Comunidade tradicional"]],
+ problemas:[["saude_mental","Sofrimento psíquico / saúde mental"],["gravidez","Gravidez na adolescência"],["ist","IST / HIV"],["violencia","Indícios de violência"],["substancias","Álcool e outras drogas"],["alimentacao","Alimentação / nutrição"],["acesso","Baixo acesso aos serviços"],["bucal","Saúde bucal"],["cronicas","Condições crônicas mal controladas"],["vinculo","Vínculo frágil escola–família–serviço"]],
+ determinantes:[["renda","Baixa renda"],["escolaridade","Baixa escolaridade familiar"],["distancia","Distância / transporte difícil"],["conectividade","Conectividade limitada"],["racismo","Racismo estrutural"],["genero","Desigualdade de gênero"]],
+ recursos:[["equipe","Equipe multiprofissional"],["ubs_ref","UBS de referência ativa"],["tempo_curto","Tempo curto (≤ 1 mês)"],["tempo_longo","Tempo longo (semestre)"],["material","Verba para material"],["sem_internet","Sem internet no local"]]
+};
+
+/* ============ BANCO DE FICHAS (aba 1) ============ */
+const BANCO=[
+{id:"P01",camada:1,titulo:"Rastreamento de violência sexual antes de qualquer ação educativa",
+ cenario:["escola","ubs","comunidade"],ciclo:["adolescencia","infancia"],problemas:["gravidez","violencia","ist"],
+ ods:["16.2","5.2","3.7"],evidencia:"Marco legal / norma obrigatória",metodologia:"Protocolo institucional de escuta protegida",
+ objetivo:"Identificar situações de violência sexual mascaradas como 'gravidez precoce' e acionar a rede de proteção antes de qualquer oficina.",
+ passos:["Levantar, com a direção e o serviço de saúde, a idade de cada gestante e a idade do parceiro referido","Toda relação sexual envolvendo menor de 14 anos é crime, independentemente de consentimento — a notificação não é opcional","Notificação compulsória à autoridade sanitária e comunicação ao Conselho Tutelar","Escuta especializada por profissional habilitado, sem revitimização e sem repetição do relato","Acionar CREAS e serviço de referência para violência sexual"],
+ recursos:"Articulação prévia com Conselho Tutelar, CREAS e UBS. Sem custo.",
+ indicadores:["Nº de casos rastreados / nº de gestações identificadas","Nº de notificações realizadas","Tempo entre identificação e acionamento da rede"],
+ cuidados:"Nunca conduzir com a turma presente. Não prometer sigilo absoluto: explicar desde o início o dever de proteção.",
+ refs:["ECA (Lei 8.069/1990)","Lei 13.431/2017 — escuta especializada","Código Penal, art. 217-A","Lei 12.845/2013","Portaria de notificação compulsória de violências"]},
+
+{id:"P02",camada:1,titulo:"Fluxo de identificação e encaminhamento de risco de suicídio",
+ cenario:["escola","ubs","comunidade"],ciclo:["adolescencia","adulto","idoso"],problemas:["saude_mental"],
+ ods:["3.4","3.8"],evidencia:"Diretriz nacional / OMS",metodologia:"Capacitação breve de porta de entrada + fluxo pactuado",
+ objetivo:"Garantir que sinais de sofrimento grave tenham caminho definido antes de iniciar qualquer atividade coletiva de saúde mental.",
+ passos:["Pactuar por escrito o fluxo escola → UBS → CAPS antes da primeira atividade","Capacitar professores e funcionários para acolher e encaminhar, não para diagnosticar","Definir profissional de referência nomeado em cada ponto do fluxo","Estabelecer retaguarda para o caso de alguém se abrir durante uma oficina","Acompanhar cada encaminhamento até a contrarreferência"],
+ recursos:"Equipe de saúde de referência; 4 a 8 horas de formação inicial.",
+ indicadores:["Existência de fluxo pactuado por escrito","Encaminhamentos com contrarreferência concluída","Tempo médio até o primeiro atendimento"],
+ cuidados:"Atividade coletiva sobre sofrimento psíquico sem retaguarda mobiliza sem acolher. Evitar abordagem sensacionalista ou centrada no ato.",
+ refs:["Lei 13.819/2019 — Política Nacional de Prevenção da Automutilação e do Suicídio","OMS — prevenção do suicídio em ambiente escolar","Linha de cuidado da RAPS"]},
+
+{id:"A01",camada:2,titulo:"Diagnóstico participativo com mapa falante e estimativa rápida",
+ cenario:["escola","comunidade","ubs"],ciclo:["adolescencia","adulto","idoso","infancia"],problemas:["saude_mental","gravidez","acesso","vinculo","substancias","alimentacao"],
+ ods:["10.2","17.17","4.7"],evidencia:"Método consolidado em saúde coletiva",metodologia:"Mapa falante, estimativa rápida participativa, roda de conversa",
+ objetivo:"Confirmar e aprofundar a queixa trazida pelos profissionais, ouvindo a própria população antes de definir a intervenção.",
+ passos:["Rodas separadas por segmento: estudantes, docentes, famílias","Construção coletiva do mapa do território com pontos de risco e de apoio","Triangular a percepção dos três grupos — a queixa docente pode não coincidir com a dos estudantes","Devolutiva pública dos achados antes de propor qualquer ação","Priorização conjunta por relevância e governabilidade"],
+ recursos:"2 a 3 encontros; papel kraft e canetas. Custo mínimo.",
+ indicadores:["Nº de participantes por segmento","Problemas priorizados coletivamente","Concordância entre segmentos"],
+ cuidados:"Não iniciar com a solução pronta. O diagnóstico do extensionista é hipótese, não conclusão.",
+ refs:["FREIRE, P. — investigação temática","Planejamento Estratégico Situacional (Matus)","Cadernos de Atenção Básica — território"]},
+
+{id:"A02",camada:2,titulo:"Aplicação de instrumentos validados de rastreio coletivo",
+ cenario:["escola","ubs"],ciclo:["adolescencia","adulto"],problemas:["saude_mental","substancias"],
+ ods:["3.4","3.5"],evidencia:"Instrumentos com validação psicométrica no Brasil",metodologia:"Aplicação supervisionada com devolutiva individual garantida",
+ objetivo:"Dimensionar a magnitude do sofrimento referido, substituindo impressão por dado.",
+ passos:["Selecionar instrumento validado para a faixa etária e o idioma","Aplicar apenas com retaguarda de acolhimento já pactuada","Garantir devolutiva individual a todo rastreio positivo","Consolidar dados agregados para planejamento","Submeter ao CEP quando houver finalidade de pesquisa"],
+ recursos:"Profissional habilitado; 1 a 2 encontros; impressão.",
+ indicadores:["Cobertura da aplicação","Prevalência de rastreio positivo","Proporção de positivos encaminhados"],
+ cuidados:"Rastrear sem ter para onde encaminhar produz dano. Rastreio não é diagnóstico.",
+ refs:["Instrumentos validados para adolescentes no Brasil","Resoluções CNS 466/2012 e 510/2016"]},
+
+{id:"I01",camada:3,titulo:"Círculos de cultura sobre projeto de vida e sexualidade",
+ cenario:["escola","comunidade"],ciclo:["adolescencia"],problemas:["gravidez","ist","saude_mental"],
+ ods:["3.7","5.6","4.7"],evidencia:"Referencial pedagógico consolidado + evidência de intervenções seriadas",metodologia:"Círculo de cultura freireano",
+ objetivo:"Construir com os adolescentes sentidos sobre corpo, desejo, projeto de vida e cuidado, a partir de temas geradores levantados por eles.",
+ passos:["Levantamento de temas geradores com a turma, sem pauta pré-definida","Encontros seriados (6 a 8 no mínimo), nunca palestra única","Grupos pequenos e estáveis, com o mesmo facilitador","Disparadores da cultura local: música, caso, fotografia do território","Fechamento com produção coletiva escolhida pelo grupo"],
+ recursos:"Facilitador com formação; 1 encontro semanal por 2 meses; sala reservada.",
+ indicadores:["Frequência ao longo da série","Temas geradores emergidos","Mudança autorreferida pré/pós"],
+ cuidados:"Palestra isolada sobre gravidez tem efeito limitado e pode reforçar culpabilização. Evitar abordagem prescritiva e moralizante.",
+ refs:["FREIRE, P. Pedagogia do Oprimido","Caderno de Atenção Básica nº 26","Diretrizes do Programa Saúde na Escola"]},
+
+{id:"I02",camada:3,titulo:"Oficinas seriadas de habilidades socioemocionais",
+ cenario:["escola"],ciclo:["adolescencia","infancia"],problemas:["saude_mental","substancias","violencia"],
+ ods:["3.4","4.1","4.7"],evidencia:"Revisões sistemáticas de programas escolares seriados",metodologia:"Oficina vivencial, dramatização, resolução de problemas",
+ objetivo:"Desenvolver regulação emocional, comunicação assertiva e resolução de conflitos como fatores de proteção.",
+ passos:["Programa estruturado com número fixo de sessões e sequência definida","Foco em treino de habilidade, não em palestra informativa","Professores como co-facilitadores, para sustentabilidade","Atividades que cabem no tempo de aula","Avaliação pré e pós com instrumento consistente"],
+ recursos:"8 a 12 sessões; papelaria; formação prévia dos docentes.",
+ indicadores:["Nº de sessões efetivamente realizadas","Adesão dos estudantes","Variação nos escores pré/pós"],
+ cuidados:"Programas universais de baixa dose têm efeito pequeno. Fidelidade de implementação é o que mais pesa.",
+ refs:["Revisões sobre school-based socioemotional programs","OMS — Helping Adolescents Thrive"]},
+
+{id:"I03",camada:3,titulo:"Formação de professores como multiplicadores e primeiros acolhedores",
+ cenario:["escola"],ciclo:["adolescencia","infancia"],problemas:["saude_mental","vinculo","violencia"],
+ ods:["4.1","3.4","17.17"],evidencia:"Estratégia recomendada em políticas de saúde escolar",metodologia:"Problematização a partir de casos reais dos docentes",
+ objetivo:"Qualificar quem está diariamente com os estudantes, transformando a queixa docente em capacidade de ação.",
+ passos:["Partir dos casos que os próprios professores trouxeram","Trabalhar limites do papel docente: acolher e encaminhar, não tratar","Construir junto o fluxo de encaminhamento e afixá-lo na escola","Prever espaço periódico de educação permanente","Cuidar também do sofrimento do corpo docente"],
+ recursos:"16 a 20 horas distribuídas; espaço no calendário escolar.",
+ indicadores:["Nº de docentes formados","Uso efetivo do fluxo após a formação","Segurança autorreferida para acolher"],
+ cuidados:"Formação sem retaguarda de serviço gera frustração: o professor identifica e não tem para onde encaminhar.",
+ refs:["Programa Saúde na Escola — eixo de formação","Política Nacional de Educação Permanente em Saúde"]},
+
+{id:"I04",camada:3,titulo:"Ampliação de acesso à contracepção e à Caderneta de Saúde do Adolescente",
+ cenario:["escola","ubs"],ciclo:["adolescencia"],problemas:["gravidez","ist","acesso"],
+ ods:["3.7","3.3","5.6","3.8"],evidencia:"Protocolo nacional de atenção",metodologia:"Ação direta articulada escola–UBS, sem barreira de acesso",
+ objetivo:"Reduzir barreiras concretas de acesso a métodos contraceptivos, preservativos e avaliação de saúde do adolescente.",
+ passos:["Pactuar com a UBS turno específico para adolescentes","Garantir atendimento sem exigência de acompanhante, conforme o direito vigente","Preservativos em ponto de livre acesso, sem constrangimento","Aplicar a Caderneta de Saúde do Adolescente como porta de avaliação ampliada","Atualizar vacinação, incluindo HPV"],
+ recursos:"UBS de referência ativa; insumos da rede.",
+ indicadores:["Nº de adolescentes atendidos na UBS após a ação","Cobertura vacinal de HPV","Dispensação de preservativos no período"],
+ cuidados:"Distribuir insumo sem trabalhar sentido e negociação de uso tem baixo efeito. Abordagem livre de julgamento.",
+ refs:["Caderno de Atenção Básica nº 26","Caderneta de Saúde do Adolescente (MS)","Protocolos da Atenção Básica"]},
+
+{id:"I05",camada:3,titulo:"Teatro do oprimido / dramatização de situações do território",
+ cenario:["escola","comunidade"],ciclo:["adolescencia","adulto"],problemas:["violencia","saude_mental","gravidez"],
+ ods:["5.2","4.7","10.2"],evidencia:"Método participativo com literatura em saúde coletiva",metodologia:"Teatro-fórum",
+ objetivo:"Ensaiar coletivamente respostas a situações reais de pressão, violência e desigualdade de gênero.",
+ passos:["Coleta de cenas reais anonimizadas com o próprio grupo","Montagem da cena-problema sem desfecho","Intervenção da plateia substituindo o protagonista","Debate sobre as saídas ensaiadas e seus limites reais","Registro das barreiras estruturais identificadas"],
+ recursos:"Facilitador com experiência em teatro-fórum; 4 a 6 encontros.",
+ indicadores:["Nº de intervenções da plateia","Temas recorrentes nas cenas","Avaliação qualitativa dos participantes"],
+ cuidados:"Cenas de violência podem disparar reexperiência em quem viveu situação semelhante — ter acolhimento disponível no mesmo dia.",
+ refs:["BOAL, A. Teatro do Oprimido","Experiências de teatro-fórum em promoção da saúde"]},
+
+{id:"I06",camada:3,titulo:"Educação entre pares (protagonismo juvenil)",
+ cenario:["escola","comunidade"],ciclo:["adolescencia"],problemas:["gravidez","ist","substancias","saude_mental"],
+ ods:["3.7","4.7","10.2"],evidencia:"Estratégia recomendada em políticas de saúde do adolescente",metodologia:"Formação de jovens multiplicadores com supervisão contínua",
+ objetivo:"Usar a legitimidade do par para alcançar temas que o adulto não alcança, e formar lideranças no território.",
+ passos:["Seleção aberta, com representação dos três territórios","Formação inicial intensiva seguida de supervisão quinzenal","Multiplicadores atuam em duplas, com adulto de referência acessível","Delimitar o que o par pode e o que deve encaminhar","Certificação e reconhecimento formal da participação"],
+ recursos:"Formação de 20h + supervisão; certificados; transporte quando houver deslocamento.",
+ indicadores:["Nº de multiplicadores formados e ativos","Alcance das atividades por pares","Retenção ao longo do ciclo"],
+ cuidados:"Não transferir ao adolescente responsabilidade de caso grave. Supervisão frouxa é o principal motivo de fracasso.",
+ refs:["Diretrizes nacionais de atenção integral à saúde de adolescentes","Revisões internacionais de peer education"]},
+
+{id:"I07",camada:3,titulo:"Ação itinerante para estudantes de zona rural e ribeirinha",
+ cenario:["escola","comunidade"],ciclo:["adolescencia","infancia","adulto"],problemas:["acesso","gravidez","bucal","cronicas"],
+ ods:["3.8","10.2","10.3"],evidencia:"Estratégia de equidade em territórios de difícil acesso",metodologia:"Ação direta descentralizada",
+ objetivo:"Compensar a barreira geográfica que impede o estudante ribeirinho e rural de chegar ao serviço.",
+ passos:["Mapear o calendário real de transporte escolar e fluvial antes de marcar datas","Concentrar ações no dia e horário em que o estudante já está na escola","Levar o serviço ao ponto de encontro do território","Material que funcione sem internet e sem energia estável","Contrarreferência com a unidade mais próxima de cada território"],
+ recursos:"Transporte, equipe deslocada, material impresso. Requer verba.",
+ indicadores:["Cobertura por território (urbano / rural / ribeirinho)","Nº de atendimentos fora da sede","Absenteísmo por origem"],
+ cuidados:"Ação única e pontual reforça a lógica de campanha. Só vale com continuidade pactuada.",
+ refs:["Política Nacional de Saúde Integral das Populações do Campo, da Floresta e das Águas","Princípio da equidade no SUS"]},
+
+{id:"E01",camada:4,titulo:"Material educativo culturalmente adaptado ao território",
+ cenario:["escola","comunidade","ubs"],ciclo:["adolescencia","adulto","idoso","infancia"],problemas:["gravidez","ist","saude_mental","alimentacao","cronicas","bucal"],
+ ods:["4.7","3.8","10.2"],evidencia:"Metodologia validável de construção de tecnologia educacional",metodologia:"Construção participativa + validação por juízes e público-alvo",
+ objetivo:"Produzir cartilha, álbum seriado ou vídeo com linguagem, imagens e cenários do próprio território.",
+ passos:["Levantar linguagem e imagens junto ao público-alvo antes de diagramar","Conteúdo a partir de fonte protocolar, com referência declarada","Validação de conteúdo por juízes com cálculo de IVC (corte usual ≥ 0,80)","Validação semântica e de aparência com o público-alvo","Registro de direito autoral e licença de uso definida"],
+ recursos:"Designer ou bolsista; impressão; 3 a 6 meses com as validações.",
+ indicadores:["IVC por item e global","Concordância na validação semântica","Alcance de distribuição"],
+ cuidados:"Material com imagem urbana distribuído em comunidade ribeirinha não gera identificação. Considerar letramento em saúde.",
+ refs:["Métodos de validação de tecnologias educacionais (IVC/CVC)","Literatura sobre letramento em saúde"]},
+
+{id:"E02",camada:4,titulo:"Protocolo de fluxo escola–UBS–CRAS/CREAS em guia rápido",
+ cenario:["escola","ubs","comunidade"],ciclo:["adolescencia","infancia"],problemas:["saude_mental","violencia","gravidez","vinculo"],
+ ods:["16.2","17.17","3.8"],evidencia:"Produto técnico de organização de serviço",metodologia:"Construção pactuada em oficina intersetorial",
+ objetivo:"Transformar em documento visual e afixável o caminho que cada caso deve percorrer, com nome e contato de cada referência.",
+ passos:["Oficina única com escola, UBS, CRAS/CREAS e Conselho Tutelar","Desenhar o fluxo a partir de situações reais já ocorridas","Nomear pessoas responsáveis, não apenas instituições","Validar com quem vai usá-lo no dia a dia","Revisão obrigatória a cada mudança de equipe"],
+ recursos:"1 oficina de 4h + diagramação. Custo baixo.",
+ indicadores:["Fluxo afixado e conhecido pela equipe","Casos que percorreram o fluxo completo","Tempo médio de resposta da rede"],
+ cuidados:"Fluxo construído só pela universidade não é apropriado pelos serviços. A pactuação é o produto; o papel é o registro.",
+ refs:["Linhas de cuidado do SUS","Notas técnicas de articulação saúde–educação–assistência"]},
+
+{id:"E03",camada:4,titulo:"Podcast ou audiodrama educativo para territórios sem conectividade",
+ cenario:["escola","comunidade"],ciclo:["adolescencia","adulto"],problemas:["saude_mental","gravidez","ist","acesso"],
+ ods:["4.7","10.2","3.8"],evidencia:"Tecnologia educacional validável; adequação a baixa conectividade",metodologia:"Produção participativa com roteirização pelos próprios jovens",
+ objetivo:"Entregar conteúdo em formato que funcione offline, em rádio comunitária e em aparelho simples.",
+ passos:["Roteirização coletiva a partir do diagnóstico","Episódios curtos, distribuíveis por arquivo ou rádio local","Revisão técnica por profissional de saúde antes de veicular","Validação com amostra do público-alvo","Distribuição também em mídia física onde a conectividade for baixa"],
+ recursos:"Equipamento simples de gravação; edição; 2 a 4 meses.",
+ indicadores:["Episódios produzidos e veiculados","Alcance estimado","Compreensão avaliada pelo público-alvo"],
+ cuidados:"Conteúdo sensível em mídia aberta exige revisão cuidadosa de linguagem.",
+ refs:["Métodos de validação de tecnologias educacionais","Comunicação popular em saúde"]},
+
+{id:"R01",camada:5,titulo:"Articulação formal com a UBS de referência e a equipe do PSE",
+ cenario:["escola","ubs","comunidade"],ciclo:["adolescencia","infancia","adulto"],problemas:["acesso","vinculo","gravidez","saude_mental","cronicas","bucal"],
+ ods:["17.17","3.8","4.1"],evidencia:"Política pública vigente",metodologia:"Pactuação formal com registro em ata",
+ objetivo:"Inserir a intervenção da extensão dentro de uma política existente, garantindo continuidade após a saída da universidade.",
+ passos:["Verificar se a escola está pactuada no Programa Saúde na Escola","Inserir as ações no plano anual do PSE do município","Registrar a pactuação em ata assinada pelos três atores","Definir quem sustenta cada ação após o término do projeto","Prever transferência de tecnologia e formação da equipe local"],
+ recursos:"Reuniões de pactuação; sem custo direto.",
+ indicadores:["Ações incorporadas ao plano do PSE","Continuidade após o encerramento do projeto","Profissionais locais formados"],
+ cuidados:"Extensão que entra, faz e sai deixa vazio. Sustentabilidade se desenha no início, não no fim.",
+ refs:["Programa Saúde na Escola (Decreto 6.286/2007)","Política Nacional de Extensão Universitária"]},
+
+{id:"R02",camada:5,titulo:"Articulação com assistência social e rede de proteção",
+ cenario:["escola","comunidade"],ciclo:["adolescencia","infancia"],problemas:["violencia","gravidez","vinculo"],
+ ods:["1.3","16.2","10.2","17.17"],evidencia:"Norma de organização da rede socioassistencial",metodologia:"Reunião de rede com discussão de casos",
+ objetivo:"Garantir que determinantes sociais identificados tenham resposta fora do setor saúde.",
+ passos:["Mapear os equipamentos do território e suas ofertas reais","Instituir reunião periódica de rede com pauta de casos","Encaminhar vulnerabilidade social ao CRAS e violações ao CREAS","Acompanhar o retorno de cada encaminhamento","Documentar as lacunas da rede como insumo para advocacy"],
+ recursos:"Tempo de equipe; reunião periódica.",
+ indicadores:["Reuniões de rede realizadas","Casos com desfecho acompanhado","Lacunas documentadas"],
+ cuidados:"Encaminhar sem acompanhar equivale a não encaminhar.",
+ refs:["Tipificação Nacional de Serviços Socioassistenciais","SUAS — Proteção Social Básica e Especial"]},
+
+{id:"V01",camada:6,titulo:"Plano de avaliação de processo e resultado da intervenção",
+ cenario:["escola","ubs","comunidade","ilpi","domicilio","hospital"],ciclo:["adolescencia","infancia","adulto","idoso","gestante"],
+ problemas:["saude_mental","gravidez","ist","violencia","substancias","alimentacao","acesso","bucal","cronicas","vinculo"],
+ ods:["17.17","3.8"],evidencia:"Requisito metodológico da extensão e da pesquisa",metodologia:"Avaliação participativa com indicadores definidos antes da ação",
+ objetivo:"Permitir afirmar o que mudou — e sustentar publicação e registro do produto.",
+ passos:["Definir indicadores antes de iniciar, nunca ao final","Coletar linha de base ainda no diagnóstico situacional","Separar indicadores de processo e de resultado","Incluir avaliação qualitativa, não só números","Devolutiva pública dos resultados ao território"],
+ recursos:"Instrumentos de coleta; tempo de análise.",
+ indicadores:["Linha de base coletada","Indicadores de processo cumpridos","Variação nos indicadores de resultado","Satisfação dos participantes"],
+ cuidados:"Sem linha de base não há como demonstrar mudança. Evitar atribuir à intervenção variações de outras causas.",
+ refs:["Avaliação em promoção da saúde","Diretrizes de curricularização e avaliação da extensão"]}
+];
+
+/* ============ CATÁLOGO DE AÇÕES DE EDUCAÇÃO EM SAÚDE (aba 2) ============ */
+const ACOES=[
+{id:"AC01",nome:"Roda de conversa",publico:["adolescencia","adulto","idoso"],cpx:"baixa",abordagem:"Dialógica",
+ ods:["4.7","10.2"],oque:"Encontro circular sem hierarquia de fala, em que o tema é conduzido pelas questões que o próprio grupo levanta.",
+ quando:"Primeiro contato com um grupo, levantamento de necessidades, temas sensíveis que não comportam exposição.",
+ como:["Círculo sem mesa e sem palestrante ao centro","Contrato de convivência combinado no início (sigilo, respeito, direito ao silêncio)","Disparador curto: uma imagem, um caso, uma pergunta","Facilitador registra, não corrige","Fechamento com síntese devolvida ao grupo"],
+ evitar:"Virar aula expositiva disfarçada. Se o facilitador fala mais que o grupo, deixou de ser roda.",
+ indicadores:["Nº de participantes e de falas espontâneas","Temas emergentes","Avaliação de pertencimento pelos participantes"],
+ refs:["Educação Popular em Saúde (PNEPS-SUS)","FREIRE, P."]},
+
+{id:"AC02",nome:"Círculo de cultura",publico:["adolescencia","adulto"],cpx:"media",abordagem:"Dialógica / problematizadora",
+ ods:["4.7","10.2"],oque:"Sequência de encontros construída a partir de temas geradores investigados com o próprio grupo.",
+ quando:"Quando há tempo de semestre e o objetivo é transformação de consciência, não transmissão de informação.",
+ como:["Etapa de investigação temática antes de qualquer planejamento de conteúdo","Codificação: transformar o tema em imagem ou cena","Descodificação coletiva","Ação transformadora decidida pelo grupo","Avaliação participativa do próprio processo"],
+ evitar:"Pular a investigação temática e chegar com os temas prontos descaracteriza o método.",
+ indicadores:["Temas geradores identificados","Continuidade da participação","Ação coletiva produzida"],
+ refs:["FREIRE, P. Pedagogia do Oprimido","Educação popular em saúde"]},
+
+{id:"AC03",nome:"Oficina vivencial",publico:["infancia","adolescencia","adulto","idoso"],cpx:"baixa",abordagem:"Ativa / experiencial",
+ ods:["4.7","3.4"],oque:"Atividade prática em que o participante faz algo e depois reflete sobre a experiência.",
+ quando:"Desenvolvimento de habilidade concreta: preparo de alimento, escovação, autocuidado, respiração, primeiros socorros.",
+ como:["Vivência primeiro, teoria depois","Material suficiente para todos praticarem, não só observarem","Reflexão guiada ao final: o que senti, o que aprendi, o que levo","Registro fotográfico com autorização de uso de imagem","Repetição em série sempre que possível"],
+ evitar:"Demonstração em que só o extensionista manipula o material.",
+ indicadores:["Nº de participantes que executaram a prática","Domínio observado ao final","Intenção de repetir em casa"],
+ refs:["Ciclo de aprendizagem experiencial (Kolb)","Diretrizes de promoção da saúde"]},
+
+{id:"AC04",nome:"Teatro-fórum",publico:["adolescencia","adulto"],cpx:"alta",abordagem:"Ativa / estética",
+ ods:["5.2","4.7","10.2"],oque:"Cena-problema apresentada sem desfecho, em que a plateia entra em cena para ensaiar saídas.",
+ quando:"Temas de opressão, violência, gênero, racismo e relações de poder.",
+ como:["Construir a cena a partir de situações reais anonimizadas","Ensaiar com o grupo, não trazer atores de fora","Curinga conduz a intervenção da plateia","Debater os limites reais de cada saída ensaiada","Encerrar sem moral pronta"],
+ evitar:"Cena caricata ou com final exemplar já definido. E conduzir sem retaguarda de acolhimento.",
+ indicadores:["Nº de intervenções da plateia","Diversidade de saídas propostas","Avaliação qualitativa"],
+ refs:["BOAL, A. Teatro do Oprimido"]},
+
+{id:"AC05",nome:"Mapa falante e cartografia social",publico:["adolescencia","adulto","idoso"],cpx:"media",abordagem:"Diagnóstica participativa",
+ ods:["10.2","10.3","17.17"],oque:"Desenho coletivo do território marcando riscos, recursos, afetos e barreiras de acesso.",
+ quando:"Diagnóstico situacional, planejamento de ação itinerante, comunidades rurais e ribeirinhas.",
+ como:["Papel grande, canetas coloridas, sem escala técnica","Cada grupo marca o que considera risco e o que considera apoio","Registrar tempo e meio de deslocamento até o serviço","Comparar mapas de grupos diferentes","Fotografar e transcrever antes de devolver o original ao grupo"],
+ evitar:"Substituir o desenho do grupo por mapa oficial da prefeitura.",
+ indicadores:["Nº de mapas produzidos","Barreiras de acesso identificadas","Recursos comunitários mapeados"],
+ refs:["Cartografia social","Vigilância em saúde de base territorial"]},
+
+{id:"AC06",nome:"Aprendizagem baseada em problemas (ABP/PBL)",publico:["adolescencia","adulto"],cpx:"media",abordagem:"Ativa / cognitiva",
+ ods:["4.7","4.1"],oque:"Grupo recebe um problema real e constrói o conhecimento necessário para resolvê-lo.",
+ quando:"Formação de multiplicadores, capacitação de agentes comunitários, formação de professores.",
+ como:["Problema realista, retirado do próprio território","Tutor facilita, não responde","Fase de levantamento de hipóteses e de lacunas de conhecimento","Estudo autodirigido entre os encontros","Retorno com síntese e aplicação"],
+ evitar:"Usar com público de baixa escolaridade sem adaptação — pode gerar exclusão.",
+ indicadores:["Hipóteses levantadas","Autonomia de busca demonstrada","Aplicação prática ao caso"],
+ refs:["Metodologias ativas de ensino-aprendizagem em saúde","Arco de Maguerez, para a variante da problematização"]},
+
+{id:"AC07",nome:"Arco de Maguerez (problematização)",publico:["adolescencia","adulto"],cpx:"media",abordagem:"Ativa / transformadora",
+ ods:["4.7","10.2"],oque:"Cinco etapas partindo da observação da realidade e retornando a ela com uma ação.",
+ quando:"Extensão curricular — é o método que melhor articula ensino, serviço e comunidade.",
+ como:["Observação da realidade e definição do problema","Identificação dos pontos-chave","Teorização com base científica","Formulação de hipóteses de solução","Aplicação à realidade: a ação concreta"],
+ evitar:"Parar na teorização e não retornar à realidade. O arco só fecha com intervenção.",
+ indicadores:["Problema definido com a comunidade","Hipóteses formuladas","Ação aplicada e avaliada"],
+ refs:["BERBEL, N. — metodologia da problematização","Diretrizes curriculares nacionais da área da saúde"]},
+
+{id:"AC08",nome:"Educação entre pares",publico:["adolescencia"],cpx:"alta",abordagem:"Protagonismo",
+ ods:["3.7","4.7","10.2"],oque:"Jovens formados para conduzir atividades educativas com outros jovens, sob supervisão.",
+ quando:"Sexualidade, drogas, saúde mental — temas em que o adulto tem baixa penetração.",
+ como:["Seleção aberta e representativa dos territórios","Formação inicial intensiva","Supervisão quinzenal obrigatória","Atuação sempre em dupla","Certificação formal"],
+ evitar:"Formar e soltar. Sem supervisão, o par reproduz mitos com autoridade ampliada.",
+ indicadores:["Multiplicadores ativos","Alcance das atividades","Retenção no ciclo"],
+ refs:["Diretrizes nacionais de saúde do adolescente","Revisões de peer education"]},
+
+{id:"AC09",nome:"Grupo operativo",publico:["adulto","idoso","gestante"],cpx:"media",abordagem:"Dialógica / terapêutica",
+ ods:["3.4","3.8"],oque:"Grupo com tarefa definida e composição estável, com função de aprendizagem e de suporte.",
+ quando:"Condições crônicas, gestantes, cuidadores, grupos de tabagismo e de saúde mental na atenção básica.",
+ como:["Composição fechada, mesmo horário e local","Coordenador e observador com papéis distintos","Tarefa explícita pactuada na primeira sessão","Registro de cada sessão","Avaliação do grupo pelo próprio grupo ao final"],
+ evitar:"Confundir com palestra recorrente para público rotativo.",
+ indicadores:["Adesão ao longo das sessões","Cumprimento da tarefa","Desfechos clínicos quando aplicável"],
+ refs:["PICHON-RIVIÈRE, E. — grupo operativo","Cadernos de Atenção Básica — trabalho com grupos"]},
+
+{id:"AC10",nome:"Cineclube-debate / cine-saúde",publico:["adolescencia","adulto","idoso"],cpx:"baixa",abordagem:"Estética / dialógica",
+ ods:["4.7","3.4"],oque:"Exibição de curta ou filme seguida de mediação de debate.",
+ quando:"Quando o tema é difícil de abordar diretamente e a ficção oferece distanciamento seguro.",
+ como:["Preferir curtas — o debate é o objetivo, não a exibição","Roteiro de mediação preparado antes","Perguntas abertas, começando pelo personagem e migrando para a vida real","Ter acolhimento disponível se o tema mobilizar","Direito de exibição verificado"],
+ evitar:"Exibir e dispensar o público sem mediação.",
+ indicadores:["Participação no debate","Temas trazidos pelo público","Avaliação da atividade"],
+ refs:["Comunicação e saúde","Mediação cultural em promoção da saúde"]},
+
+{id:"AC11",nome:"Gamificação e jogos educativos presenciais",publico:["infancia","adolescencia"],cpx:"media",abordagem:"Ativa / lúdica",
+ ods:["4.7","3.7"],oque:"Trilhas, quizzes, jogos de tabuleiro e dinâmicas de pontuação aplicadas a conteúdo de saúde.",
+ quando:"Público infantil e adolescente, grandes grupos, ambientes escolares.",
+ como:["Regra simples, explicada em menos de dois minutos","Conteúdo tecnicamente revisado antes de virar carta ou pergunta","Momento de debriefing obrigatório ao final","Premiação simbólica, não competitiva entre pessoas","Material reaproveitável entre turmas"],
+ evitar:"Jogo sem debriefing vira recreação — o aprendizado se consolida na conversa final.",
+ indicadores:["Nº de participantes","Acertos pré/pós","Avaliação de engajamento"],
+ refs:["Jogos sérios em educação em saúde","Aprendizagem baseada em jogos"]},
+
+{id:"AC12",nome:"Estações / circuito de saúde",publico:["adolescencia","adulto","idoso"],cpx:"media",abordagem:"Ativa / rotativa",
+ ods:["3.8","3.4"],oque:"Percurso com postos temáticos por onde pequenos grupos circulam em tempo cronometrado.",
+ quando:"Grande público em tempo limitado; feiras de saúde; dias de campanha na escola.",
+ como:["Cada estação com um objetivo único e mensurável","Tempo fixo por estação, com sinal de rodízio","Ficha de percurso que o participante leva consigo","Estação final de encaminhamento e dúvidas","Registro de quantos completaram o circuito"],
+ evitar:"Transformar em vitrine de serviços sem continuidade. Definir o que acontece depois do dia.",
+ indicadores:["Nº de percursos completos","Encaminhamentos gerados","Satisfação"],
+ refs:["Promoção da saúde em ambiente escolar","Planejamento de ações coletivas"]},
+
+{id:"AC13",nome:"Visita domiciliar educativa",publico:["adulto","idoso","gestante"],cpx:"media",abordagem:"Individualizada / dialógica",
+ ods:["3.8","3.4","10.2"],oque:"Encontro educativo no domicílio, com leitura do contexto real de vida.",
+ quando:"Pessoas com dificuldade de deslocamento, condições crônicas, puerpério, idosos em isolamento.",
+ como:["Agendamento prévio e consentimento explícito","Sempre em dupla, com identificação institucional","Observar o ambiente sem invadir","Negociar metas com a pessoa, não prescrever","Registro e retorno à equipe de referência"],
+ evitar:"Fiscalizar a casa. A visita é oferta de cuidado, não inspeção.",
+ indicadores:["Visitas realizadas","Metas negociadas e alcançadas","Encaminhamentos gerados"],
+ refs:["Cadernos de Atenção Básica — visita domiciliar","Atenção domiciliar no SUS"]},
+
+{id:"AC14",nome:"Oficina culinária e educação alimentar",publico:["infancia","adolescencia","adulto","idoso"],cpx:"media",abordagem:"Ativa / experiencial",
+ ods:["2.2","3.4"],oque:"Preparo coletivo de alimentos com discussão sobre escolhas, custo e cultura alimentar local.",
+ quando:"Segurança alimentar, DCNT, alimentação escolar, aproveitamento integral de alimentos.",
+ como:["Partir do que existe e se produz no território","Custo real calculado com o grupo","Todos cozinham, ninguém só assiste","Discussão sobre rotulagem e ultraprocessados","Receituário produzido pelo próprio grupo"],
+ evitar:"Propor alimentos indisponíveis ou inacessíveis na região.",
+ indicadores:["Participantes que executaram o preparo","Receitas incorporadas","Mudança autorreferida de consumo"],
+ refs:["Guia Alimentar para a População Brasileira","Política Nacional de Alimentação e Nutrição"]},
+
+{id:"AC15",nome:"Campanha comunitária e mobilização social",publico:["adolescencia","adulto","idoso"],cpx:"alta",abordagem:"Mobilização / advocacy",
+ ods:["17.17","10.2","10.3"],oque:"Ação coletiva de visibilidade sobre um problema, conduzida com a comunidade e voltada a decisores.",
+ quando:"O problema identificado depende de decisão política ou de outro setor.",
+ como:["Definir com a comunidade a pauta e o interlocutor","Produzir material de comunicação com linguagem local","Envolver rádio comunitária, igreja, associação de moradores","Registrar a demanda formalmente junto ao órgão responsável","Acompanhar e dar retorno público da resposta"],
+ evitar:"Mobilizar sem canal de interlocução definido gera frustração e desmobiliza.",
+ indicadores:["Adesões à campanha","Demandas formalizadas","Respostas obtidas"],
+ refs:["Promoção da saúde e advocacy","Carta de Ottawa"]},
+
+{id:"AC16",nome:"Roda de práticas corporais e integrativas",publico:["adolescencia","adulto","idoso"],cpx:"baixa",abordagem:"Vivencial / corporal",
+ ods:["3.4","3.8"],oque:"Práticas de movimento, respiração e relaxamento em grupo, conduzidas por profissional habilitado.",
+ quando:"Sofrimento psíquico leve, estresse, dor crônica, idosos, grupos de DCNT.",
+ como:["Condução por profissional com formação na prática ofertada","Adaptação a limitações físicas dos participantes","Regularidade semanal — prática isolada tem pouco efeito","Espaço e vestimenta adequados combinados previamente","Articulação com a PNPIC no município"],
+ evitar:"Oferecer prática integrativa como substituto de cuidado em saúde mental que requer serviço especializado.",
+ indicadores:["Frequência","Percepção de bem-estar pré/pós","Continuidade após o projeto"],
+ refs:["Política Nacional de Práticas Integrativas e Complementares (PNPIC)"]}
+];
+
+/* ============ CATÁLOGO DE PRODUTOS EDUCACIONAIS (aba 3) ============ */
+const PRODUTOS=[
+{id:"PR01",nome:"Cartilha educativa",nat:"impresso",cpx:"baixa",ods:["4.7","3.8"],
+ oque:"Material impresso com linguagem acessível, ilustrado, para leitura autônoma ou mediada.",
+ quando:"Público com letramento suficiente, tema que se beneficia de consulta posterior, territórios sem internet.",
+ requisitos:"Conteúdo protocolar, ilustrador ou banco de imagens licenciado, diagramação, verba de impressão.",
+ validacao:"Validação de conteúdo por juízes (IVC ≥ 0,80) + validação semântica e de aparência com o público-alvo.",
+ registro:"Direito autoral — depósito na Biblioteca Nacional e/ou licença Creative Commons; DOI via repositório institucional.",
+ dica:"É o produto mais frequente e, por isso, o mais exigente em diferencial: o que justifica a sua cartilha é a adaptação cultural ao território, não o conteúdo."},
+
+{id:"PR02",nome:"Álbum seriado / flip chart",nat:"impresso",cpx:"baixa",ods:["4.7","10.2"],
+ oque:"Sequência de pranchas ilustradas para mediação de grupo, com roteiro no verso para quem conduz.",
+ quando:"Público com baixo letramento, atividade conduzida por agente comunitário, uso repetido pela equipe local.",
+ requisitos:"Ilustração, impressão em material resistente, roteiro de mediação.",
+ validacao:"Juízes de conteúdo + juízes de aparência (design) + teste de mediação com a equipe que vai usar.",
+ registro:"Direito autoral; registrar também o roteiro de mediação como parte do produto.",
+ dica:"Excelente para transferência de tecnologia: a equipe local continua usando depois que a extensão sai."},
+
+{id:"PR03",nome:"História em quadrinhos ou cordel educativo",nat:"impresso",cpx:"media",ods:["4.7","10.2"],
+ oque:"Narrativa ilustrada ou versificada que aborda o tema por meio de personagens do próprio território.",
+ quando:"Adolescentes, comunidades com forte tradição oral, temas sensíveis que pedem distanciamento ficcional.",
+ requisitos:"Roteirista, ilustrador ou cordelista, impressão.",
+ validacao:"Juízes de conteúdo + validação com o público-alvo quanto a identificação e compreensão.",
+ registro:"Direito autoral; atenção à cessão de direitos do ilustrador, definida por contrato antes da produção.",
+ dica:"Alta identificação quando os personagens e cenários são reconhecivelmente locais."},
+
+{id:"PR04",nome:"Vídeo educativo curto",nat:"audiovisual",cpx:"media",ods:["4.7","3.8"],
+ oque:"Peça de 2 a 5 minutos, com roteiro validado, para uso em sala de espera, escola e redes.",
+ quando:"Conteúdo demonstrativo (técnica, procedimento), público jovem, necessidade de escala.",
+ requisitos:"Roteiro, captação, edição, legendagem, autorização de uso de imagem de todos que aparecem.",
+ validacao:"Validação do roteiro por juízes antes da gravação — refazer vídeo é caro; depois, validação com o público-alvo.",
+ registro:"Direito autoral; hospedagem institucional com DOI; licença de uso explícita.",
+ dica:"Legendas e audiodescrição ampliam acessibilidade e costumam ser critério valorizado na avaliação do produto."},
+
+{id:"PR05",nome:"Animação ou motion graphics",nat:"audiovisual",cpx:"alta",ods:["4.7"],
+ oque:"Vídeo animado que dispensa atores e permite representar processos internos do corpo ou situações sensíveis.",
+ quando:"Temas em que filmar pessoas seria constrangedor ou inviável; conteúdo fisiológico.",
+ requisitos:"Animador ou domínio de ferramenta; tempo de produção considerável.",
+ validacao:"Storyboard validado por juízes antes de animar.",
+ registro:"Direito autoral; se houver software próprio, registro de programa no INPI.",
+ dica:"Caro em tempo. Só compensa se o produto for reutilizável em vários territórios."},
+
+{id:"PR06",nome:"Podcast ou audiodrama educativo",nat:"audiovisual",cpx:"media",ods:["4.7","10.2"],
+ oque:"Série em áudio, distribuível por arquivo, rádio comunitária ou mídia física.",
+ quando:"Baixa conectividade, população com restrição visual, deslocamentos longos, rádio comunitária ativa.",
+ requisitos:"Microfone razoável, edição, roteiro, revisão técnica.",
+ validacao:"Roteiro validado por juízes; teste de compreensão com o público-alvo.",
+ registro:"Direito autoral; ISSN quando houver periodicidade de série.",
+ dica:"É o formato mais subestimado para territórios ribeirinhos e rurais — funciona onde vídeo não carrega."},
+
+{id:"PR07",nome:"Jogo de tabuleiro ou de cartas educativo",nat:"ludico",cpx:"media",ods:["4.7","3.7"],
+ oque:"Jogo físico com regras e conteúdo de saúde incorporado à mecânica.",
+ quando:"Escolas, grupos recorrentes, público infantojuvenil, contextos sem energia ou internet.",
+ requisitos:"Design de jogo, prototipagem, testes de jogabilidade, impressão.",
+ validacao:"Validação de conteúdo por juízes + teste de jogabilidade com o público + avaliação de aprendizagem.",
+ registro:"Direito autoral sobre arte e texto; desenho industrial no INPI quando houver componente físico original.",
+ dica:"A mecânica precisa ensinar. Se o conteúdo é só um texto na carta, é questionário com dado."},
+
+{id:"PR08",nome:"Jogo digital ou aplicativo móvel",nat:"digital",cpx:"alta",ods:["4.7","3.7"],
+ oque:"Software interativo para celular, com conteúdo educativo e registro de uso.",
+ quando:"Público jovem conectado, necessidade de escala, coleta de dados de uso para pesquisa.",
+ requisitos:"Desenvolvedor ou parceria com curso de TI; teste em dispositivos reais; política de privacidade.",
+ validacao:"Conteúdo por juízes + usabilidade (System Usability Scale, heurísticas de Nielsen, ISO/IEC 25010).",
+ registro:"Registro de programa de computador no INPI, via NIT da universidade. Verificar titularidade institucional.",
+ dica:"Atenção à conectividade do território-alvo: app que exige internet estável exclui justamente quem mais precisa."},
+
+{id:"PR09",nome:"Web app / site responsivo",nat:"digital",cpx:"media",ods:["4.7","3.8","17.17"],
+ oque:"Aplicação que roda no navegador, sem instalação, acessível por link em qualquer aparelho.",
+ quando:"Ferramentas de apoio à decisão, calculadoras, questionários, repositórios — inclusive esta própria ferramenta.",
+ requisitos:"Desenvolvimento ou plataforma no-code; hospedagem; domínio institucional.",
+ validacao:"Conteúdo por juízes + usabilidade + teste com usuários reais em campo.",
+ registro:"Registro de programa de computador no INPI; versionamento com DOI (Zenodo/OSF) para citabilidade.",
+ dica:"Costuma ser a melhor relação entre esforço e alcance: atualiza-se instantaneamente e não depende de loja de aplicativos."},
+
+{id:"PR10",nome:"Protocolo, POP ou fluxograma assistencial",nat:"tecnico",cpx:"media",ods:["3.8","17.17"],
+ oque:"Documento que padroniza uma conduta ou organiza o caminho de um caso dentro da rede.",
+ quando:"Existe variabilidade indesejada de conduta, ou a rede não sabe para onde encaminhar.",
+ requisitos:"Revisão de literatura e protocolos vigentes; pactuação com os serviços envolvidos.",
+ validacao:"Validação por juízes especialistas + pactuação formal com os serviços que vão executá-lo.",
+ registro:"Direito autoral; registro como produto técnico-tecnológico na Plataforma Sucupira; publicação institucional.",
+ dica:"É o produto com maior chance de impacto real no serviço e um dos mais valorizados como PTT."},
+
+{id:"PR11",nome:"Curso ou módulo em ambiente virtual (EaD)",nat:"digital",cpx:"alta",ods:["4.1","4.7"],
+ oque:"Percurso formativo estruturado em plataforma (Moodle, AVASUS ou similar), com certificação.",
+ quando:"Formação de profissionais ou multiplicadores em escala; educação permanente.",
+ requisitos:"Design instrucional, produção de conteúdo, plataforma institucional, tutoria.",
+ validacao:"Conteúdo por juízes + avaliação de aprendizagem dos cursistas + avaliação de reação.",
+ registro:"Direito autoral; registro como PTT; certificação pela pró-reitoria de extensão.",
+ dica:"Alto esforço inicial, mas é o produto que melhor sustenta continuidade após a saída da universidade."},
+
+{id:"PR12",nome:"Infográfico e peça para redes sociais",nat:"digital",cpx:"baixa",ods:["4.7"],
+ oque:"Peça visual única que sintetiza uma informação de saúde em linguagem direta.",
+ quando:"Comunicação rápida, complemento de outros produtos, campanhas.",
+ requisitos:"Ferramenta de design; fonte protocolar declarada.",
+ validacao:"Juízes de conteúdo e de aparência; teste de compreensão rápido com o público.",
+ registro:"Direito autoral; licença Creative Commons facilita a replicação por outros serviços.",
+ dica:"Isolado, é produto frágil para um doutorado. Como série validada e avaliada quanto ao alcance, ganha consistência."},
+
+{id:"PR13",nome:"Guia ou manual para profissionais",nat:"tecnico",cpx:"media",ods:["4.1","3.8"],
+ oque:"Documento orientador de prática, mais extenso que um protocolo e menos prescritivo.",
+ quando:"Equipes que precisam de orientação em tema novo; transferência de tecnologia ao fim do projeto.",
+ requisitos:"Revisão bibliográfica consistente; diagramação; revisão técnica externa.",
+ validacao:"Juízes especialistas; teste de uso pela equipe destinatária.",
+ registro:"Direito autoral; ISBN quando publicado por editora universitária; registro como PTT.",
+ dica:"Publicar por editora universitária com ISBN agrega peso ao produto e facilita a citação."},
+
+{id:"PR14",nome:"Kit pedagógico / maleta itinerante",nat:"ludico",cpx:"media",ods:["4.7","10.2"],
+ oque:"Conjunto físico com materiais, roteiros e dinâmicas para replicar uma ação completa.",
+ quando:"Ação que precisa ser repetida por outras equipes ou em territórios distantes.",
+ requisitos:"Produção dos materiais, embalagem, manual de uso.",
+ validacao:"Teste de replicação por equipe que não participou da construção — é o teste decisivo.",
+ registro:"Direito autoral sobre roteiros e arte; desenho industrial se houver objeto original.",
+ dica:"Feito para replicabilidade, que é exatamente o requisito que você colocou para a sua ferramenta."},
+
+{id:"PR15",nome:"Instrumento ou escala adaptada e validada",nat:"tecnico",cpx:"alta",ods:["3.4","3.8"],
+ oque:"Questionário, checklist ou escala construído ou adaptado transculturalmente e submetido a análise psicométrica.",
+ quando:"Não existe instrumento adequado para medir o que o projeto precisa medir.",
+ requisitos:"Domínio metodológico em psicometria; amostra suficiente; análise estatística.",
+ validacao:"Validade de conteúdo, de face e de construto; análise de confiabilidade; aprovação em CEP obrigatória.",
+ registro:"Direito autoral; publicação em periódico é o registro de fato reconhecido para instrumentos.",
+ dica:"Produto de alto valor acadêmico e alto custo metodológico. Só entre nele se for o núcleo da tese."},
+
+{id:"PR16",nome:"Banco de dados ou painel de indicadores do território",nat:"digital",cpx:"media",ods:["17.17","3.8"],
+ oque:"Repositório organizado com os dados do diagnóstico situacional e painel de visualização.",
+ quando:"Projetos de extensão continuados, que acumulam diagnósticos ao longo de semestres.",
+ requisitos:"Estrutura de dados definida; anonimização; termo de uso; hospedagem institucional.",
+ validacao:"Consistência e completude dos dados; avaliação de usabilidade do painel.",
+ registro:"Registro de programa no INPI para o painel; DOI para o conjunto de dados; observar a LGPD.",
+ dica:"Transforma a extensão episódica em série histórica — e série histórica é o que gera artigo original."},
+
+{id:"PR17",nome:"Material acessível (Libras, audiodescrição, fácil leitura)",nat:"impresso",cpx:"media",ods:["10.2","4.7"],
+ oque:"Versão acessível de conteúdo educativo para pessoas com deficiência ou baixo letramento.",
+ quando:"Sempre que o público-alvo incluir pessoas com deficiência — e idealmente como padrão, não exceção.",
+ requisitos:"Intérprete de Libras, audiodescritor ou revisor de linguagem simples.",
+ validacao:"Validação obrigatória com o próprio público com deficiência, não apenas com especialistas.",
+ registro:"Direito autoral; a versão acessível é produto distinto e registrável separadamente.",
+ dica:"Diferencial forte e pouco explorado. Costuma ser bem avaliado como inovação social."},
+
+{id:"PR18",nome:"Relatório técnico e devolutiva ao território",nat:"tecnico",cpx:"baixa",ods:["17.17","10.2"],
+ oque:"Documento com os achados do diagnóstico e da intervenção, escrito em linguagem acessível à comunidade e aos gestores.",
+ quando:"Encerramento de todo ciclo de extensão. Deveria ser obrigatório.",
+ requisitos:"Sistematização dos dados; reunião pública de devolutiva.",
+ validacao:"Leitura prévia por representantes da comunidade antes da versão final.",
+ registro:"Registro como produto técnico na Sucupira; depósito no repositório institucional com DOI.",
+ dica:"É o produto que fecha o ciclo ético da extensão: quem cedeu a informação tem direito de recebê-la de volta."}
+];
+
+/* ============ FILTROS DOS CATÁLOGOS ============ */
+const FILTROS={
+ fa_pub:[["infancia","Infância"],["adolescencia","Adolescência"],["adulto","Pessoa adulta"],["idoso","Pessoa idosa"],["gestante","Gestantes"]],
+ fa_cpx:[["baixa","Baixa"],["media","Média"],["alta","Alta"]],
+ fp_nat:[["impresso","Impresso"],["audiovisual","Audiovisual"],["digital","Digital / tecnológico"],["ludico","Lúdico"],["tecnico","Técnico / normativo"]],
+ fp_cpx:[["baixa","Baixa"],["media","Média"],["alta","Alta"]]
+};
+
+/* ============ CRUZAMENTO: catálogos × diagnóstico ============ */
+/* prob = problemas atendidos | cen = cenários | bonus/penal = ajustes contextuais */
+const MAP_ACOES={
+ AC01:{prob:["saude_mental","gravidez","ist","substancias","vinculo","acesso","alimentacao","cronicas","bucal"],cen:["escola","ubs","comunidade","ilpi"],bonus:{tempo_curto:4}},
+ AC02:{prob:["gravidez","ist","saude_mental","vinculo"],cen:["escola","comunidade"],bonus:{tempo_longo:5},penal:{tempo_curto:6}},
+ AC03:{prob:["alimentacao","bucal","cronicas","saude_mental"],cen:["escola","ubs","comunidade","ilpi","domicilio"],bonus:{material:3}},
+ AC04:{prob:["violencia","gravidez","saude_mental","substancias"],cen:["escola","comunidade"],bonus:{genero:6,tempo_longo:3},penal:{tempo_curto:5}},
+ AC05:{prob:["acesso","vinculo","saude_mental","gravidez","alimentacao"],cen:["escola","comunidade","ubs"],bonus:{distancia:6,ribeirinho:6,rural:5}},
+ AC06:{prob:["vinculo","saude_mental","cronicas"],cen:["escola","ubs","hospital"],bonus:{equipe:4},penal:{escolaridade:4}},
+ AC07:{prob:["saude_mental","gravidez","ist","acesso","vinculo","alimentacao","cronicas","bucal","substancias","violencia"],cen:["escola","ubs","comunidade"],bonus:{tempo_longo:4}},
+ AC08:{prob:["gravidez","ist","substancias","saude_mental"],cen:["escola","comunidade"],bonus:{tempo_longo:5},penal:{tempo_curto:6}},
+ AC09:{prob:["cronicas","saude_mental","alimentacao"],cen:["ubs","ilpi","comunidade","hospital"],bonus:{equipe:4,tempo_longo:3}},
+ AC10:{prob:["saude_mental","gravidez","violencia","substancias"],cen:["escola","comunidade"],bonus:{tempo_curto:3},penal:{sem_internet:2}},
+ AC11:{prob:["bucal","alimentacao","ist","gravidez"],cen:["escola","comunidade"],bonus:{material:3}},
+ AC12:{prob:["acesso","bucal","cronicas","alimentacao","ist"],cen:["escola","comunidade","ubs"],bonus:{tempo_curto:5,equipe:4}},
+ AC13:{prob:["cronicas","acesso","saude_mental","alimentacao"],cen:["domicilio","comunidade","ubs"],bonus:{distancia:4,equipe:3}},
+ AC14:{prob:["alimentacao","cronicas"],cen:["escola","comunidade","ubs"],bonus:{material:4}},
+ AC15:{prob:["acesso","violencia","vinculo"],cen:["comunidade","escola"],bonus:{distancia:5,renda:4,tempo_longo:3},penal:{tempo_curto:5}},
+ AC16:{prob:["saude_mental","cronicas"],cen:["ubs","comunidade","ilpi","escola"],bonus:{tempo_longo:3}}
+};
+const MAP_PROD={
+ PR01:{prob:["gravidez","ist","saude_mental","alimentacao","cronicas","bucal","acesso"],bonus:{sem_internet:5,conectividade:4}},
+ PR02:{prob:["acesso","cronicas","gravidez","bucal","alimentacao"],bonus:{sem_internet:6,escolaridade:6,equipe:3}},
+ PR03:{prob:["gravidez","ist","saude_mental","violencia"],bonus:{sem_internet:4,adolescencia:5}},
+ PR04:{prob:["gravidez","ist","bucal","alimentacao","cronicas"],penal:{sem_internet:4}},
+ PR05:{prob:["ist","gravidez","cronicas"],penal:{sem_internet:4,tempo_curto:5}},
+ PR06:{prob:["saude_mental","gravidez","acesso","ist"],bonus:{sem_internet:7,conectividade:6,distancia:4}},
+ PR07:{prob:["bucal","alimentacao","ist","gravidez"],bonus:{sem_internet:5,material:3}},
+ PR08:{prob:["gravidez","ist","saude_mental","cronicas"],penal:{sem_internet:8,conectividade:6,tempo_curto:4}},
+ PR09:{prob:["acesso","vinculo","cronicas","saude_mental"],penal:{sem_internet:5}},
+ PR10:{prob:["violencia","saude_mental","vinculo","acesso","gravidez"],bonus:{equipe:4,ubs_ref:4}},
+ PR11:{prob:["vinculo","saude_mental","cronicas"],penal:{sem_internet:7,conectividade:5,tempo_curto:4}},
+ PR12:{prob:["gravidez","ist","alimentacao","bucal","saude_mental","cronicas"],bonus:{tempo_curto:4}},
+ PR13:{prob:["vinculo","saude_mental","violencia","cronicas"],bonus:{equipe:4}},
+ PR14:{prob:["gravidez","ist","bucal","alimentacao","saude_mental"],bonus:{rural:6,ribeirinho:6,distancia:5,sem_internet:4}},
+ PR15:{prob:["saude_mental","substancias"],bonus:{tempo_longo:4},penal:{tempo_curto:6}},
+ PR16:{prob:["acesso","vinculo","cronicas"],bonus:{tempo_longo:4}},
+ PR17:{prob:["acesso","saude_mental","cronicas","bucal"],bonus:{escolaridade:7,racismo:2}},
+ PR18:{prob:["saude_mental","gravidez","ist","violencia","substancias","alimentacao","acesso","bucal","cronicas","vinculo"],bonus:{}}
+};
+
+function ctx(e){
+ return [].concat(e.recursos,e.determinantes,e.territorio,e.ciclo);
+}
+function cruzar(itens,mapa,e,max){
+ const c=ctx(e);
+ const out=itens.map(it=>{
+  const m=mapa[it.id];if(!m)return null;
+  const pr=(m.prob||[]).filter(p=>e.problemas.includes(p));
+  if(e.problemas.length&&!pr.length)return null;
+  if(m.cen&&e.cenario.length&&!m.cen.some(x=>e.cenario.includes(x)))return null;
+  let s=pr.length*10;
+  const raz=[];
+  Object.keys(m.bonus||{}).forEach(k=>{if(c.includes(k)){s+=m.bonus[k];raz.push(k);}});
+  Object.keys(m.penal||{}).forEach(k=>{if(c.includes(k))s-=m.penal[k];});
+  return {it:it,s:s,pr:pr,raz:raz};
+ }).filter(Boolean).sort((a,b)=>b.s-a.s);
+ return out.slice(0,max);
+}
+const ROTULO={};
+[].concat(VOCAB.problemas,VOCAB.recursos,VOCAB.determinantes,VOCAB.territorio,VOCAB.ciclo)
+ .forEach(([v,l])=>{ROTULO[v]=l;});
+function motivo(x){
+ const p=x.pr.map(k=>ROTULO[k]||k).join(", ");
+ const r=x.raz.map(k=>ROTULO[k]||k).join(", ");
+ return "Indicado por: "+p+(r?" · ajustado ao contexto: "+r:"");
+}
+
+/* ============ INFRA ============ */
+function esc(s){return String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));}
+function li(a){return a.map(x=>"<li>"+esc(x)+"</li>").join("");}
+function odsChips(arr){return (arr||[]).filter(k=>ODS[k]).map(k=>'<span class="chip ods">'+ODS[k][0]+" · meta "+k+"</span>").join("");}
+const CPXL={baixa:"Complexidade baixa",media:"Complexidade média",alta:"Complexidade alta"};
+
+function montarOpts(dict){
+ Object.keys(dict).forEach(g=>{
+  const box=document.querySelector('[data-group="'+g+'"]');if(!box)return;
+  const multi=(g!=="cenario"&&g!=="fods");
+  dict[g].forEach(([v,l])=>{
+   const lab=document.createElement("label");lab.className="opt";
+   lab.innerHTML='<input type="'+(multi?"checkbox":"radio")+'" name="'+g+'" value="'+esc(v)+'"><span>'+esc(l)+'</span>';
+   box.appendChild(lab);
+  });
+ });
+}
+montarOpts(VOCAB);montarOpts(FILTROS);
+montarOpts({fods:Object.keys(ODS).map(k=>[k,ODS[k][0]+" · "+k])});
+
+function lidos(g){return Array.from(document.querySelectorAll('[data-group="'+g+'"] input:checked')).map(i=>i.value);}
+
+/* ============ ABAS ============ */
+document.querySelectorAll('nav.tabs button').forEach(b=>{
+ b.addEventListener("click",()=>{
+  document.querySelectorAll('nav.tabs button').forEach(x=>x.setAttribute("aria-selected","false"));
+  b.setAttribute("aria-selected","true");
+  document.querySelectorAll(".panel").forEach(p=>p.classList.remove("on"));
+  document.getElementById("p-"+b.dataset.p).classList.add("on");
+  window.scrollTo({top:0,behavior:"smooth"});
+ });
+});
+
+/* ============ ABA 1: MOTOR ============ */
+const CAMADAS={
+ 1:["Camada 1 — Antes de intervir","Condutas obrigatórias de proteção. Precedem qualquer atividade educativa."],
+ 2:["Camada 2 — Aprofundar o diagnóstico","Confirmar a queixa com quem vive o território, antes de definir a ação."],
+ 3:["Camada 3 — Intervenções diretas","Ações com a população, em metodologias ativas e em série."],
+ 4:["Camada 4 — Produtos educacionais","Tecnologias construídas e validadas, passíveis de registro."],
+ 5:["Camada 5 — Articulação e sustentabilidade","O que garante que a ação sobreviva à saída da universidade."],
+ 6:["Camada 6 — Avaliação","O que permite afirmar que houve mudança."]};
+
+function pontuar(f,e){
+ let s=0;
+ const pr=f.problemas.filter(p=>e.problemas.includes(p)).length;
+ if(e.problemas.length&&pr===0&&f.camada!==6)return -1;
+ s+=pr*10;
+ if(e.cenario.length){if(f.cenario.some(c=>e.cenario.includes(c)))s+=6;else if(f.camada!==6)return -1;}
+ if(e.ciclo.length&&f.ciclo.some(c=>e.ciclo.includes(c)))s+=5;
+ if((e.territorio.includes("ribeirinho")||e.territorio.includes("rural"))&&f.id==="I07")s+=8;
+ if(e.recursos.includes("sem_internet")&&f.id==="E03")s+=6;
+ if(e.recursos.includes("tempo_curto")&&["I02","I06","E01","E03"].includes(f.id))s-=3;
+ if(e.recursos.includes("ubs_ref")&&["I04","R01"].includes(f.id))s+=3;
+ if(e.determinantes.includes("distancia")&&f.id==="I07")s+=4;
+ if(e.determinantes.includes("genero")&&["I05","I01"].includes(f.id))s+=3;
+ if(e.determinantes.includes("renda")&&f.id==="R02")s+=3;
+ if(f.camada===1)s+=100;
+ return s;
+}
+
+function alertas(e){
+ const o=[];
+ if(e.problemas.includes("gravidez")&&e.ciclo.includes("adolescencia"))
+  o.push({t:"stop",h:"Rastreamento obrigatório de violência sexual",
+   p:"Gravidez em adolescentes exige verificação da idade de cada gestante e do parceiro referido antes de qualquer ação educativa. Relação sexual com menor de 14 anos configura estupro de vulnerável, independentemente de consentimento, e a notificação é compulsória.",
+   l:["Comunicar o Conselho Tutelar e notificar à autoridade sanitária","Acionar CREAS e serviço de referência para violência sexual","Não conduzir a escuta em grupo nem repetir o relato"]});
+ if(e.problemas.includes("violencia"))
+  o.push({t:"stop",h:"Indícios de violência: notificação compulsória",
+   p:"Suspeita ou confirmação de violência contra criança e adolescente tem notificação compulsória e comunicação obrigatória ao Conselho Tutelar, independentemente da vontade da equipe ou da família.",
+   l:["Escuta especializada apenas por profissional habilitado","Evitar revitimização: o relato não deve ser repetido a cada profissional"]});
+ if(e.problemas.includes("saude_mental"))
+  o.push({t:"warn",h:"Retaguarda assistencial antes da atividade coletiva",
+   p:"Atividades de saúde mental mobilizam conteúdos pessoais. Só inicie depois de pactuar por escrito o fluxo até a UBS e o CAPS, com profissional de referência nomeado e disponibilidade para acolher quem se abrir durante o encontro.",
+   l:["Definir quem acolhe no mesmo dia, se necessário","Rastrear só quando houver para onde encaminhar"]});
+ if(e.territorio.includes("ribeirinho")||e.territorio.includes("rural"))
+  o.push({t:"warn",h:"Equidade entre territórios",
+   p:"Populações rurais e ribeirinhas costumam ser invisibilizadas no planejamento feito a partir da sede. Verifique calendário de transporte, sazonalidade das águas e conectividade antes de definir datas, formatos e materiais.",
+   l:["Estratificar todos os indicadores por território de origem"]});
+ return o;
+}
+
+function renderFicha(f){
+ return '<details class="ficha"><summary><span class="ftitle">'+esc(f.titulo)+'</span><span class="meta">'+
+  '<span class="chip ev">'+esc(f.evidencia)+'</span><span class="chip">'+esc(f.metodologia)+'</span>'+
+  odsChips(f.ods)+'<span class="chip">ficha '+f.id+'</span></span></summary>'+
+  '<div class="body"><dl>'+
+  '<div><dt>Objetivo</dt><dd>'+esc(f.objetivo)+'</dd></div>'+
+  '<div><dt>Como fazer</dt><dd><ul>'+li(f.passos)+'</ul></dd></div>'+
+  '<div><dt>Recursos necessários</dt><dd>'+esc(f.recursos)+'</dd></div>'+
+  '<div><dt>Indicadores de avaliação</dt><dd><ul>'+li(f.indicadores)+'</ul></dd></div>'+
+  '<div><dt>Cuidados e limites</dt><dd>'+esc(f.cuidados)+'</dd></div>'+
+  '<div><dt>Fundamentação</dt><dd class="refs"><ul>'+li(f.refs)+'</ul></dd></div>'+
+  '</dl></div></details>';
+}
+
+function gerar(){
+ const e={cenario:lidos("cenario"),ciclo:lidos("ciclo"),territorio:lidos("territorio"),
+  problemas:lidos("problemas"),determinantes:lidos("determinantes"),recursos:lidos("recursos")};
+ const alvo=document.getElementById("resultado");
+ if(!e.problemas.length&&!e.cenario.length){
+  alvo.innerHTML='<section class="card"><p class="empty">Marque ao menos o cenário e um problema identificado para gerar as opções.</p></section>';
+  return;}
+ const rank=BANCO.map(f=>({f:f,s:pontuar(f,e)})).filter(x=>x.s>=0).sort((a,b)=>b.s-a.s);
+ const sugA=cruzar(ACOES,MAP_ACOES,e,6);
+ const sugP=cruzar(PRODUTOS,MAP_PROD,e,6);
+ const metas=[...new Set([].concat(
+   rank.flatMap(x=>x.f.ods||[]),
+   sugA.flatMap(x=>x.it.ods||[]),
+   sugP.flatMap(x=>x.it.ods||[])
+ ))].filter(k=>ODS[k]).sort();
+
+ let h='<section class="card"><h2><span class="num">2.</span>Opções de intervenção sugeridas</h2>'+
+  '<p class="count">'+rank.length+' fichas de intervenção, '+sugA.length+' abordagens educativas e '+sugP.length+' produtos educacionais correspondem ao diagnóstico informado, ordenados por aderência. São caminhos possíveis — a escolha final se constrói com a comunidade.</p>'+
+  '<div class="row noprint" style="margin-top:12px"><button class="ghost" onclick="window.print()">Exportar relatório em PDF</button>'+
+  '<button class="ghost" id="abrirtudo">Abrir todas as fichas</button></div></section>';
+
+ if(metas.length){
+  h+='<section class="card"><h2>Alinhamento com a Agenda 2030</h2>'+
+   '<p class="hint">Metas dos ODS contempladas pelo conjunto de intervenções sugeridas para este diagnóstico.</p><div class="odsgrid">'+
+   metas.map(k=>'<div class="odscard"><b>'+ODS[k][0]+' · meta '+k+'</b><span>'+esc(ODS[k][1])+'</span></div>').join("")+'</div></section>';}
+
+ alertas(e).forEach(a=>{
+  h+='<div class="alertbox '+a.t+'"><h3>'+esc(a.h)+'</h3><p>'+esc(a.p)+'</p><ul>'+li(a.l)+'</ul></div>';});
+
+ [1,2,3,4,5,6].forEach(c=>{
+  const its=rank.filter(x=>x.f.camada===c);if(!its.length)return;
+  h+='<div class="layer"><h3>'+CAMADAS[c][0]+'</h3><p>'+CAMADAS[c][1]+'</p></div>';
+  its.forEach(x=>{h+=renderFicha(x.f);});});
+
+ if(sugA.length){
+  h+='<div class="layer"><h3>Abordagens de educação em saúde para este caso</h3>'+
+   '<p>Selecionadas do catálogo conforme os problemas, o cenário e as condições informadas. O catálogo completo está na aba correspondente.</p></div>';
+  sugA.forEach(x=>{h+='<p class="why">'+esc(motivo(x))+'</p>'+renderAcao(x.it);});}
+
+ if(sugP.length){
+  h+='<div class="layer"><h3>Produtos educacionais viáveis para este caso</h3>'+
+   '<p>Tecnologias compatíveis com o problema e com as condições do território — inclusive conectividade, tempo disponível e escolaridade. Cada uma traz o caminho de validação e de registro.</p></div>';
+  sugP.forEach(x=>{h+='<p class="why">'+esc(motivo(x))+'</p>'+renderProd(x.it);});}
+
+ alvo.innerHTML=h;
+ document.getElementById("abrirtudo").addEventListener("click",function(){
+  const ds=alvo.querySelectorAll("details");const op=this.dataset.o==="1";
+  ds.forEach(d=>d.open=!op);this.dataset.o=op?"0":"1";
+  this.textContent=op?"Abrir todas as fichas":"Fechar todas as fichas";});
+ alvo.scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+/* ============ ABA 2: AÇÕES ============ */
+function renderAcao(a){
+ return '<details class="ficha"><summary><span class="ftitle">'+esc(a.nome)+'</span><span class="meta">'+
+  '<span class="chip ev">'+esc(a.abordagem)+'</span><span class="chip lvl">'+CPXL[a.cpx]+'</span>'+
+  odsChips(a.ods)+'</span></summary><div class="body"><dl>'+
+  '<div><dt>O que é</dt><dd>'+esc(a.oque)+'</dd></div>'+
+  '<div><dt>Quando usar</dt><dd>'+esc(a.quando)+'</dd></div>'+
+  '<div><dt>Como conduzir</dt><dd><ul>'+li(a.como)+'</ul></dd></div>'+
+  '<div><dt>O que evitar</dt><dd>'+esc(a.evitar)+'</dd></div>'+
+  '<div><dt>Indicadores</dt><dd><ul>'+li(a.indicadores)+'</ul></dd></div>'+
+  '<div><dt>Fundamentação</dt><dd class="refs"><ul>'+li(a.refs)+'</ul></dd></div>'+
+  '</dl></div></details>';
+}
+function listarAcoes(){
+ const pub=lidos("fa_pub"),cpx=lidos("fa_cpx");
+ const f=ACOES.filter(a=>(!pub.length||a.publico.some(p=>pub.includes(p)))&&(!cpx.length||cpx.includes(a.cpx)));
+ document.getElementById("lista-acoes").innerHTML= f.length?
+  '<p class="count" style="margin:0 0 10px">'+f.length+' abordagens.</p>'+f.map(renderAcao).join("")
+  :'<section class="card"><p class="empty">Nenhuma abordagem com esses filtros.</p></section>';
+}
+
+/* ============ ABA 3: PRODUTOS ============ */
+const NATL={impresso:"Impresso",audiovisual:"Audiovisual",digital:"Digital / tecnológico",ludico:"Lúdico",tecnico:"Técnico / normativo"};
+function renderProd(p){
+ return '<details class="ficha"><summary><span class="ftitle">'+esc(p.nome)+'</span><span class="meta">'+
+  '<span class="chip ev">'+NATL[p.nat]+'</span><span class="chip lvl">'+CPXL[p.cpx]+'</span>'+
+  odsChips(p.ods)+'</span></summary><div class="body"><dl>'+
+  '<div><dt>O que é</dt><dd>'+esc(p.oque)+'</dd></div>'+
+  '<div><dt>Quando escolher</dt><dd>'+esc(p.quando)+'</dd></div>'+
+  '<div><dt>O que é preciso ter</dt><dd>'+esc(p.requisitos)+'</dd></div>'+
+  '<div><dt>Como validar</dt><dd>'+esc(p.validacao)+'</dd></div>'+
+  '<div><dt>Como registrar</dt><dd>'+esc(p.registro)+'</dd></div>'+
+  '<div><dt>Observação para o extensionista</dt><dd>'+esc(p.dica)+'</dd></div>'+
+  '</dl></div></details>';
+}
+function listarProd(){
+ const nat=lidos("fp_nat"),cpx=lidos("fp_cpx");
+ const f=PRODUTOS.filter(p=>(!nat.length||nat.includes(p.nat))&&(!cpx.length||cpx.includes(p.cpx)));
+ document.getElementById("lista-prod").innerHTML= f.length?
+  '<p class="count" style="margin:0 0 10px">'+f.length+' produtos.</p>'+f.map(renderProd).join("")
+  :'<section class="card"><p class="empty">Nenhum produto com esses filtros.</p></section>';
+}
+
+/* ============ ABA 4: ODS ============ */
+function listarODS(){
+ const sel=lidos("fods");
+ const alvo=document.getElementById("painel-ods");
+ if(!sel.length){
+  alvo.innerHTML='<section class="card"><div class="odsgrid">'+
+   Object.keys(ODS).map(k=>'<div class="odscard"><b>'+ODS[k][0]+' · meta '+k+'</b><span>'+esc(ODS[k][1])+'</span></div>').join("")+
+   '</div></section>';return;}
+ const k=sel[0];
+ const fi=BANCO.filter(f=>(f.ods||[]).includes(k));
+ const ac=ACOES.filter(a=>(a.ods||[]).includes(k));
+ const pr=PRODUTOS.filter(p=>(p.ods||[]).includes(k));
+ let h='<section class="card"><h2>'+ODS[k][0]+' · meta '+k+'</h2><p class="hint">'+esc(ODS[k][1])+'</p></section>';
+ if(fi.length){h+='<div class="layer"><h3>Fichas de intervenção</h3></div>'+fi.map(renderFicha).join("");}
+ if(ac.length){h+='<div class="layer"><h3>Ações de educação em saúde</h3></div>'+ac.map(renderAcao).join("");}
+ if(pr.length){h+='<div class="layer"><h3>Produtos educacionais</h3></div>'+pr.map(renderProd).join("");}
+ if(!fi.length&&!ac.length&&!pr.length){h+='<section class="card"><p class="empty">Nada indexado nesta meta ainda.</p></section>';}
+ alvo.innerHTML=h;
+}
+
+/* ============ EVENTOS ============ */
+document.getElementById("gerar").addEventListener("click",gerar);
+document.getElementById("limpar").addEventListener("click",()=>{
+ document.querySelectorAll('#formulario input').forEach(i=>i.checked=false);
+ document.getElementById("resultado").innerHTML="";});
+function setar(g,v){document.querySelectorAll('[data-group="'+g+'"] input').forEach(i=>{i.checked=v.includes(i.value);});}
+document.getElementById("exemplo").addEventListener("click",()=>{
+ setar("cenario",["escola"]);setar("ciclo",["adolescencia"]);
+ setar("territorio",["urbano","rural","ribeirinho"]);
+ setar("problemas",["saude_mental","gravidez","vinculo"]);
+ setar("determinantes",["distancia","genero","renda"]);
+ setar("recursos",["equipe","ubs_ref","tempo_longo"]);gerar();});
+["fa_pub","fa_cpx"].forEach(g=>document.querySelector('[data-group="'+g+'"]').addEventListener("change",listarAcoes));
+["fp_nat","fp_cpx"].forEach(g=>document.querySelector('[data-group="'+g+'"]').addEventListener("change",listarProd));
+document.querySelector('[data-group="fods"]').addEventListener("change",listarODS);
+listarAcoes();listarProd();listarODS();
+</script>
+</body>
+</html>
